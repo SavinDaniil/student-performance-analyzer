@@ -1,0 +1,100 @@
+name: Generate Performance Report
+
+on:
+  # Run on schedule (every Monday at 9:00 UTC)
+  schedule:
+    - cron: '0 9 * * 1'
+  
+  # Allow manual trigger with parameters
+  workflow_dispatch:
+    inputs:
+      data_file:
+        description: 'Data file to analyze (in data/ folder)'
+        required: false
+        default: 'sample_students.csv'
+      generate_visualizations:
+        description: 'Generate visualization charts'
+        required: false
+        default: true
+        type: boolean
+
+jobs:
+  generate-report:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Run analysis and generate report
+      run: |
+        echo "🔍 Running Student Performance Analysis..."
+        echo "📁 Data file: ${{ github.event.inputs.data_file || 'sample_students.csv' }}"
+        
+        python src/main.py \
+          --data "data/${{ github.event.inputs.data_file || 'sample_students.csv' }}" \
+          --output "reports"
+        
+        echo "✅ Analysis complete!"
+
+    - name: List generated files
+      run: |
+        echo "📊 Generated files:"
+        ls -la reports/
+        if [ -d "reports/figures" ]; then
+          echo "📈 Figures:"
+          ls -la reports/figures/
+        fi
+
+    - name: Upload report as artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: performance-report-${{ github.run_number }}
+        path: |
+          reports/report.html
+          reports/figures/
+        retention-days: 90
+
+    - name: Create report summary
+      run: |
+        echo "## 📊 Student Performance Report" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**Generated:** $(date -u '+%Y-%m-%d %H:%M UTC')" >> $GITHUB_STEP_SUMMARY
+        echo "**Data file:** ${{ github.event.inputs.data_file || 'sample_students.csv' }}" >> $GITHUB_STEP_SUMMARY
+        echo "**Run number:** #${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### 📥 Download" >> $GITHUB_STEP_SUMMARY
+        echo "The report has been uploaded as an artifact. Download it from the Actions tab." >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### 📁 Generated Files" >> $GITHUB_STEP_SUMMARY
+        echo "- \`reports/report.html\` - Main HTML report" >> $GITHUB_STEP_SUMMARY
+        echo "- \`reports/figures/\` - Visualization charts" >> $GITHUB_STEP_SUMMARY
+
+    - name: Commit report to repository (optional)
+      if: github.event_name == 'schedule'
+      run: |
+        git config --local user.email "github-actions[bot]@users.noreply.github.com"
+        git config --local user.name "github-actions[bot]"
+        
+        # Create reports branch if it doesn't exist
+        git checkout -B reports-archive
+        
+        # Copy report with timestamp
+        TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+        mkdir -p archived_reports
+        cp -r reports/* archived_reports/report_${TIMESTAMP}/ 2>/dev/null || true
+        
+        git add archived_reports/
+        git commit -m "📊 Auto-generated report ${TIMESTAMP}" || echo "No changes to commit"
+        git push origin reports-archive --force || echo "Push skipped"
+
