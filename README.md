@@ -1,6 +1,6 @@
 # 📊 Student Performance Analyzer
 
-![Tests](https://github.com/YOUR_USERNAME/student-performance-analyzer/workflows/Tests%20and%20Code%20Quality/badge.svg)
+![Tests](https://github.com/SavinDaniil/student-performance-analyzer/workflows/Tests%20and%20Code%20Quality/badge.svg)
 
 > **Инструмент для анализа успеваемости студентов с автоматической генерацией отчетов и выявлением студентов группы риска.**
 
