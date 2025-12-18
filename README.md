@@ -1,8 +1,6 @@
 # 📊 Student Performance Analyzer
 
 ![Tests](https://github.com/YOUR_USERNAME/student-performance-analyzer/workflows/Tests%20and%20Code%20Quality/badge.svg)
-![Python](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11-blue)
-![License](https://img.shields.io/badge/license-MIT-green)
 
 > **Инструмент для анализа успеваемости студентов с автоматической генерацией отчетов и выявлением студентов группы риска.**
 
