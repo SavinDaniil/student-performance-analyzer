@@ -306,9 +306,7 @@ pytest tests/test_analyzer.py -v
 
 ## 👤 Автор
 
-**Студент УРФУ**
-
-- GitHub: [@YOUR_USERNAME](https://github.com/YOUR_USERNAME)
+- Савин Даниил
 
 ---
 
